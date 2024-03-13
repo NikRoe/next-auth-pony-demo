@@ -1,7 +1,8 @@
 import Layout from "@/components/Layout";
 import GlobalStyle from "../styles";
 import useSWR, { SWRConfig } from "swr";
-import { useState } from "react";
+
+import { SessionProvider } from "next-auth/react";
 
 const fetcher = async (url) => {
   const res = await fetch(url);
@@ -17,34 +18,27 @@ const fetcher = async (url) => {
   return res.json();
 };
 
-export default function App({ Component, pageProps }) {
+export default function App({
+  Component,
+  pageProps: { session, ...pageProps },
+}) {
   const { data: ponies, error, isLoading } = useSWR("/api/ponies", fetcher);
-  const [favorites, setFavorites] = useState([]);
-
-  function toggleFavorite(id) {
-    const foundEntry = favorites.find((favorite) => favorite === id);
-    if (foundEntry) {
-      setFavorites(favorites.filter((favorite) => favorite !== id));
-    } else {
-      setFavorites([...favorites, id]);
-    }
-  }
 
   return (
     <>
       <GlobalStyle />
-      <SWRConfig value={{ fetcher }}>
-        <Layout>
-          <Component
-            {...pageProps}
-            toggleFavorite={toggleFavorite}
-            favorites={favorites}
-            ponies={ponies}
-            error={error}
-            isLoading={isLoading}
-          />
-        </Layout>
-      </SWRConfig>
+      <SessionProvider session={session}>
+        <SWRConfig value={{ fetcher }}>
+          <Layout>
+            <Component
+              {...pageProps}
+              ponies={ponies}
+              error={error}
+              isLoading={isLoading}
+            />
+          </Layout>
+        </SWRConfig>
+      </SessionProvider>
     </>
   );
 }

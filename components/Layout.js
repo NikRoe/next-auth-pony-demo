@@ -1,9 +1,11 @@
 import styled from "styled-components";
 import Footer from "./Footer";
+import LoginButton from "./LoginButton";
 
 export default function Layout({ children }) {
   return (
     <>
+      <LoginButton />
       <Main>{children}</Main>
       <Footer />
     </>
